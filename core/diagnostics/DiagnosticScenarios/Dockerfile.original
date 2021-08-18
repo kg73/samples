@@ -1,0 +1,28 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+WORKDIR /src
+COPY ["DiagnosticScenarios.csproj", "."]
+RUN dotnet restore "./DiagnosticScenarios.csproj"
+COPY . .
+WORKDIR "/src/."
+RUN dotnet build "DiagnosticScenarios.csproj" -c Release -o /app/build
+
+# Install desired .NET CLI diagnostics tools
+RUN dotnet tool install --tool-path /tools dotnet-trace
+RUN dotnet tool install --tool-path /tools dotnet-counters
+RUN dotnet tool install --tool-path /tools dotnet-dump
+
+FROM build AS publish
+RUN dotnet publish "DiagnosticScenarios.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+COPY --from=build /tools .
+ENTRYPOINT ["dotnet", "DiagnosticScenarios.dll"]

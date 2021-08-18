@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  diagnosticscenarios:
+    image: ${DOCKER_REGISTRY-}diagnosticscenarios
+    build:
+      context: .
+      dockerfile: Dockerfile
+    cap_add:
+      - SYS_PTRACE
