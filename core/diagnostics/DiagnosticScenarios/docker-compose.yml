@@ -8,3 +8,12 @@ services:
       dockerfile: Dockerfile
     cap_add:
       - SYS_PTRACE
+  diagsidecar:
+    #image: mcr.microsoft.com/dotnet/samples:aspnetapp
+    image: ${DOCKER_REGISTRY-}diagsidecar
+    build:
+      context: .
+      dockerfile: Dockerfile_sidecar
+    cap_add:
+      - SYS_PTRACE
+    #pid: "service:diagnosticscenarios"
